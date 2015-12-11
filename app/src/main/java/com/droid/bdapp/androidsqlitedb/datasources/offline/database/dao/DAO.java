@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.droid.bdapp.androidsqlitedb.datasources.offline.database.DatabaseManager;
 import com.droid.bdapp.androidsqlitedb.datasources.offline.database.table.Table;
@@ -12,6 +13,7 @@ import com.droid.bdapp.androidsqlitedb.datasources.offline.database.table.Table;
  * Created by mdruhulamin on 12/10/15.
  */
 public abstract class DAO {
+    private static final String TAG = DAO.class.getSimpleName();
 
     private SQLiteDatabase mDatabaseConnection;
 
@@ -31,24 +33,37 @@ public abstract class DAO {
      */
     public long insert(final String tableName, final ContentValues rowToCreate) {
         long rowId = -1;
-        rowId = mDatabaseConnection.insert(tableName, null, rowToCreate);
-
-        DatabaseManager.getInstance().closeDatabase();
+        try {
+            rowId = mDatabaseConnection.insert(tableName, null, rowToCreate);
+        } catch (Exception e) {
+            Log.i(TAG, "Insert error");
+        } finally {
+            DatabaseManager.getInstance().closeDatabase();
+        }
         return rowId;
     }
 
     public void update(final String tableName, final int rowIdToUpdate, final ContentValues rowToUpdate) {
-
         final String whereClause = "ID=" + rowIdToUpdate;
-        mDatabaseConnection.update(tableName, rowToUpdate, whereClause, null);
-        DatabaseManager.getInstance().closeDatabase();
+        try {
+            mDatabaseConnection.update(tableName, rowToUpdate, whereClause, null);
+        } catch (Exception e) {
+            Log.i(TAG, "update error");
+        } finally {
+            DatabaseManager.getInstance().closeDatabase();
+        }
     }
 
     public void dropTable(final String tableName) {
 
         String sql = "DROP TABLE IF EXISTS " + tableName;
-        mDatabaseConnection.execSQL(sql);
-        DatabaseManager.getInstance().closeDatabase();
+        try {
+            mDatabaseConnection.execSQL(sql);
+        } catch (Exception e) {
+            Log.i(TAG, "Insert error");
+        } finally {
+            DatabaseManager.getInstance().closeDatabase();
+        }
     }
 
     public boolean dropDatabase(final Context appContext, final String databaseName) {
@@ -59,10 +74,23 @@ public abstract class DAO {
 
         String whereClause = "ID=" + id;
         String[] whereArgs = null;
-        mDatabaseConnection.delete(tableName, whereClause, whereArgs);
-        DatabaseManager.getInstance().closeDatabase();
+        try {
+            mDatabaseConnection.delete(tableName, whereClause, whereArgs);
+        } catch (Exception e) {
+            Log.i(TAG, " error occurred during delete row by id");
+        } finally {
+            DatabaseManager.getInstance().closeDatabase();
+        }
     }
 
+
+    /**
+     * NOTE: MUST Close database after geting data from this Cursor
+     *
+     * @param tableName
+     * @param columnNamesToShow
+     * @return
+     */
     public Cursor selectAll(final String tableName, final String[] columnNamesToShow) {
 
         String[] columnsToShow = columnNamesToShow;
@@ -74,6 +102,14 @@ public abstract class DAO {
         return mDatabaseConnection.query(tableName, columnsToShow, selection, selectionArgs, groupBy, having, orderBy);
     }
 
+    /**
+     * NOTE: MUST Close database after geting data from this Cursor
+     *
+     * @param tableName
+     * @param columnNamesToShow
+     * @param columnNameToOrderBy
+     * @return
+     */
     public Cursor selectAllOrderBy(final String tableName, final String[] columnNamesToShow, final String columnNameToOrderBy) {
 
         String[] columnsToShow = columnNamesToShow;
@@ -85,6 +121,14 @@ public abstract class DAO {
         return mDatabaseConnection.query(tableName, columnsToShow, selection, selectionArgs, groupBy, having, orderBy);
     }
 
+    /**
+     * NOTE: MUST Close database after geting data from this Cursor
+     *
+     * @param tableName
+     * @param columnNamesToShow
+     * @param columnNameToDistinct
+     * @return
+     */
     public Cursor selectAllDistinct(final String tableName, final String[] columnNamesToShow, final String columnNameToDistinct) {
 
         String[] columnsToShow = columnNamesToShow;
@@ -96,6 +140,13 @@ public abstract class DAO {
         return mDatabaseConnection.query(tableName, columnsToShow, selection, selectionArgs, groupBy, having, orderBy);
     }
 
+    /**
+     * NOTE: MUST Close database after geting data from this Cursor
+     *
+     * @param tableName
+     * @param id
+     * @return
+     */
     public Cursor selectRowById(final String tableName, final int id) {
 
         String[] columnsToShow = null;
@@ -107,6 +158,13 @@ public abstract class DAO {
         return mDatabaseConnection.query(tableName, columnsToShow, selection, selectionArgs, groupBy, having, orderBy);
     }
 
+    /**
+     * NOTE: MUST Close database after geting data from this Cursor
+     *
+     * @param tableName
+     * @param timestamp
+     * @return
+     */
     public Cursor getDifferences(final String tableName, final String timestamp) {
 
         String[] columnsToShow = null;
@@ -118,7 +176,7 @@ public abstract class DAO {
         return mDatabaseConnection.query(tableName, columnsToShow, selection, selectionArgs, groupBy, having, orderBy);
     }
 
-    private void garantConnection(Context appContext, Table tableToOpen) {
+    private void grantConnection(Context appContext, Table tableToOpen) {
         if (appContext == null || tableToOpen == null) {
             throw new NullPointerException("appContext and tableToOpen can't be set to null");
         }

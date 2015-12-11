@@ -1,10 +1,13 @@
 package com.droid.bdapp.androidsqlitedb.ui.activities;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.droid.bdapp.androidsqlitedb.R;
 import com.droid.bdapp.androidsqlitedb.app.AppBaseActivity;
+import com.droid.bdapp.androidsqlitedb.datasources.offline.database.DatabaseManager;
 import com.droid.bdapp.androidsqlitedb.datasources.offline.database.DbConfig;
 import com.droid.bdapp.androidsqlitedb.datasources.offline.database.dao.TodoDAO;
 import com.droid.bdapp.androidsqlitedb.models.Todo;
@@ -17,29 +20,35 @@ public class MainActivity extends AppBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TodoDAO todoDao = new TodoDAO(this);
-        //add row
-        Todo todo = new Todo("TodoTitle", "Todo note");
-        long rowId=todoDao.insert(todo);
+        addRow();
 
+        //
         final Todo getATodo = getRow();
-        final int id = getATodo.getId();
-        final String title = getATodo.getTitle();
-        final String note=getATodo.getNote();
-
-        System.out.print("------------ " + id + " - " + title + " - " + note);
+        Log.d(TAG, getATodo.getId() + " - " + getATodo.getTitle() + " - " + getATodo.getNote());
 
     }
 
+    private void addRow() {
+        final TodoDAO todoDao = new TodoDAO(this);
+
+        final ContentValues addNewTodoRow = new ContentValues();
+        addNewTodoRow.put(DbConfig.COL_TITLE, "TodoTitle");
+        addNewTodoRow.put(DbConfig.COL_NOTE, "Todo note");
+
+        final long rowId = todoDao.insert(DbConfig.TABLE_TODO, addNewTodoRow);
+    }
+
     public Todo getRow() {
-        TodoDAO todoDao = new TodoDAO(this);
+        final TodoDAO todoDao = new TodoDAO(this);
         Todo todo = new Todo();
-        final Cursor result = todoDao.selectAll(DbConfig.TABLE_TODO, null);
+        final Cursor result = todoDao.selectRowById(DbConfig.TABLE_TODO, 1);
+
         result.moveToFirst();
-        //todo.setId(result.getInt(result.getColumnIndex(DbConfig.COL_ID)));
         todo.setTitle(result.getString(result.getColumnIndex(DbConfig.COL_TITLE)));
         todo.setNote(result.getString(result.getColumnIndex(DbConfig.COL_NOTE)));
 
+        //
+        DatabaseManager.getInstance().closeDatabase();
         return todo;
     }
 }

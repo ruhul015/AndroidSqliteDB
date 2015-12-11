@@ -5,8 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 
-import com.droid.bdapp.androidsqlitedb.datasources.online.TaskManager;
-
 
 /**
  * Created by mdruhulamin on 02/12/15.
@@ -14,21 +12,11 @@ import com.droid.bdapp.androidsqlitedb.datasources.online.TaskManager;
 public class AppBaseActivity extends AppCompatActivity {
     public static final String TAG = AppBaseActivity.class.getSimpleName();
 
-    protected TaskManager taskManager = AppBaseApplication
-            .getGlobalTaskManager();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        taskManager.initialize(this);
-    }
-
 
 
     public void setupToolbarAsActionbar(final Toolbar toolbar) {
