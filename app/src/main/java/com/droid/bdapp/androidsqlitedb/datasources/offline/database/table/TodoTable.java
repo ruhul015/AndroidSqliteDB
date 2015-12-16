@@ -1,7 +1,5 @@
 package com.droid.bdapp.androidsqlitedb.datasources.offline.database.table;
 
-import android.content.Context;
-
 import com.droid.bdapp.androidsqlitedb.datasources.offline.database.DbConfig;
 
 /**
@@ -9,13 +7,9 @@ import com.droid.bdapp.androidsqlitedb.datasources.offline.database.DbConfig;
  */
 public class TodoTable extends Table {
 
-    public TodoTable(Context appContext) {
-        super(appContext);
-    }
-
     @Override
     public String defineTableColumnsToCreate() {
-        return DbConfig.getTodoTableCreateStatement();
+        return getTodoTableCreateStatement();
 
     }
 
@@ -23,4 +17,18 @@ public class TodoTable extends Table {
     public String defineTableNameToCreate() {
         return DbConfig.TABLE_TODO;
     }
+
+    @Override
+    public String defineTableIdToCreate() {
+        return DbConfig.getTableIdAsPrimaryKeyCreateStatement();
+    }
+
+    public static String getTodoTableCreateStatement() {
+        final String c1 = DbConfig.COL_TITLE + DbConfig.TEXT + DbConfig.COMMA;
+        final String c2 = DbConfig.COL_NOTE + DbConfig.TEXT;
+
+        return c1 + c2;
+    }
+
+
 }
